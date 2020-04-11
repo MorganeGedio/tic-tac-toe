@@ -3,14 +3,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class Square extends React.Component {
-  // add constructor to initialize the state 
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: null,
-    };
-  }
-
   render() {
     return (
       // passing a function as the onClick prop
@@ -18,18 +10,43 @@ class Square extends React.Component {
         className="square"
         // re-render Square whenever button is clicked 
         onClick={() =>
-          this.setState({value: 'X'}) }
+          this.props.onClick() }
       >
-          {this.state.value}
+          {this.props.value}
       </button>
     );
   }
 }
 
 class Board extends React.Component {
+  // store state in Board component - when Board's state changes, Square components re-render automatically (= controlled components)
+  constructor(props) {
+    super(props);
+    // initial state = array of 9 nulls corresponding to 9 squares
+    this.state = {
+      squares: Array(9).fill(null),
+    }
+  }
+
+  handleClick(i) {
+    // create a copy of the squares array
+    const squares = this.state.squares.slice();
+    squares[i] = 'X';
+    this.setState({squares: squares});
+  }
+
   renderSquare(i) {
     // passing a prop called value in child component Square
-    return <Square value={i} />;
+    // instruct each individual Square about its current value
+    return (
+      <Square 
+        // props 1 
+        value={this.state.squares[i]} 
+        // props 2
+        // passing a function from Board to Square
+        onClick={() => this.handleClick(i)}
+      />
+    );
   }
 
   render() {
