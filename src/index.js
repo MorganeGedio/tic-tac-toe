@@ -2,22 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
-  render() {
-    return (
-      // passing a function as the onClick prop
-      <button 
-        className="square"
-        // re-render Square whenever button is clicked 
-        onClick={() =>
-          this.props.onClick() }
-      >
-          {this.props.value}
-      </button>
-    );
-  }
+// FUNCTION COMPONENT
+// contains only a render & doesn't have their own state
+function Square(props) {
+  return (
+    // passing a function as the onClick prop
+    <button 
+    className="square"
+    // re-render Square whenever button is clicked 
+    onClick={props.onClick}>
+      {props.value}
+  </button>
+);
 }
-
+ 
+// REACT COMPONENT CLASS
 class Board extends React.Component {
   // store state in Board component - when Board's state changes, Square components re-render automatically (= controlled components)
   constructor(props) {
