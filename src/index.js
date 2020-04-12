@@ -21,7 +21,6 @@ class Board extends React.Component {
   // // store state in Board component - when Board's state changes, Square components re-render automatically (= controlled components)
   // constructor(props) {
   //   super(props);
-  //   // initial state = array of 9 nulls corresponding to 9 squares
   //   this.state = {
   //     squares: Array(9).fill(null),
   //     xIsNext: true,
@@ -73,14 +72,18 @@ class Game extends React.Component {
     super(props);
     this.state = {
       history: [{
+        // initial state = array of 9 nulls corresponding to 9 squares
         squares: Array(9).fill(null),
       }],
+      // state to indicate which step we're currently viewing
+      stepNumber: 0,
       xIsNext: true,
     }
   }
 
   handleClick(i) {
-    const history = this.state.history;
+    // if going back in point and making a new move from this point, we need to delete all future incorrect history
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length -1];
     // create a copy of the squares array
     const squares = current.squares.slice();
@@ -95,13 +98,22 @@ class Game extends React.Component {
       history: history.concat([{
       squares: squares,
       }]),
+      stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
   }
 
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    })
+  }
+
   render() {
     const history = this.state.history;
-    const current = history[history.length -1];
+    // render currently selected move according to stepNumber
+    const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
     // map history of moves to React elements representing buttons
@@ -111,7 +123,8 @@ class Game extends React.Component {
         'Go to game start';
       return (
         // for each move => list item that contains a button with on click handler
-        <li> 
+        // key to differentiate each list item from its siblings
+        <li key={move}> 
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       )
