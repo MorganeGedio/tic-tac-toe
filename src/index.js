@@ -18,30 +18,15 @@ function Square(props) {
  
 // REACT COMPONENT CLASS
 class Board extends React.Component {
-  // store state in Board component - when Board's state changes, Square components re-render automatically (= controlled components)
-  constructor(props) {
-    super(props);
-    // initial state = array of 9 nulls corresponding to 9 squares
-    this.state = {
-      squares: Array(9).fill(null),
-      xIsNext: true,
-    }
-  }
-
-  handleClick(i) {
-    // create a copy of the squares array
-    const squares = this.state.squares.slice();
-    // return early - ignore click if winner or square filled
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-    // flip value of xIsNext
-    squares[i] = this.state.xIsNext ? 'X' : '0';
-    this.setState({
-      squares: squares,
-      xIsNext: !this.state.xIsNext,
-    });
-  }
+  // // store state in Board component - when Board's state changes, Square components re-render automatically (= controlled components)
+  // constructor(props) {
+  //   super(props);
+  //   // initial state = array of 9 nulls corresponding to 9 squares
+  //   this.state = {
+  //     squares: Array(9).fill(null),
+  //     xIsNext: true,
+  //   }
+  // }
 
   renderSquare(i) {
     // passing a prop called value in child component Square
@@ -49,26 +34,17 @@ class Board extends React.Component {
     return (
       <Square 
         // props 1 
-        value={this.state.squares[i]} 
+        value={this.props.squares[i]} 
         // props 2
         // passing a function from Board to Square
-        onClick={() => this.handleClick(i)}
+        onClick={() => this.props.onClick(i)}
       />
     );
   }
 
   render() {
-    const winner = calculateWinner(this.state.squares);
-    let status; 
-    if(winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
-
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -90,14 +66,61 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+  // we want this component to display list of past moves
+  // gives Game component full control over the Board’s data
+  // & lets it instruct the Board to render previous turns from the history
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      xIsNext: true,
+    }
+  }
+
+  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length -1];
+    // create a copy of the squares array
+    const squares = current.squares.slice();
+    // return early - ignore click if winner or square filled
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    // flip value of xIsNext
+    squares[i] = this.state.xIsNext ? 'X' : '0';
+    this.setState({
+      // concat does not mutate original array 
+      history: history.concat([{
+      squares: squares,
+      }]),
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
   render() {
+    const history = this.state.history;
+    const current = history[history.length -1];
+    const winner = calculateWinner(current.squares);
+
+    let status; 
+    if(winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Board 
+            squares={current.squares}
+            onClick={(i) => this.handleClick(i)}
+          />
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
+          <div>{status}</div>
           <ol>{/* TODO */}</ol>
         </div>
       </div>
